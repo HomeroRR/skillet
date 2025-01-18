@@ -15,8 +15,8 @@ import pykos  # type: ignore[import-untyped]
 from skillet.setup.maps import ACTUATOR_NAME_TO_ID
 
 # Constants
-JOINT_NAME = "right_gripper"
-MOVE_DEGREES = 35.0  # Could be 10 or -20 or whatever you want
+JOINT_NAME = "right_hip_roll"
+MOVE_DEGREES = -10.0  # Could be 10 or -20 or whatever you want
 
 
 def configure_joint(kos: pykos.KOS, joint_name: str) -> None:
@@ -33,9 +33,8 @@ def configure_joint(kos: pykos.KOS, joint_name: str) -> None:
         actuator_id=actuator_id,
         kp=32.0,  # Proportional gain
         kd=32.0,  # Derivative gain
-        ki=32.0,  # Integral gain
-        max_torque=100.0,  # Maximum torque limit
         torque_enabled=True,
+        zero_position=True
     )
     logging.info("Configuration result: %s", result)
 
@@ -62,9 +61,9 @@ def move_joint(kos: pykos.KOS, joint_name: str, position: float) -> None:
     """
     logging.info("Moving %s to position %f", joint_name, position)
     command = {"actuator_id": ACTUATOR_NAME_TO_ID[joint_name], "position": position}
+
     result = kos.actuator.command_actuators([command])
     logging.info("Movement result: %s", result)
-
 
 def move_joint_a_little(joint_name: str, move_degrees: float) -> None:
     """Move a joint by a specified number of degrees from its current position.
@@ -87,11 +86,10 @@ def move_joint_a_little(joint_name: str, move_degrees: float) -> None:
     # Read current position
     actuator_id = ACTUATOR_NAME_TO_ID[joint_name]
     state = kos.actuator.get_actuators_state([actuator_id])
-    current_position = state.states[0].position
+    current_position = state[0].position
 
     # Determine target position
     target_position = current_position - move_degrees
-
     # Move joint and log new state
     move_joint(kos, joint_name, target_position)
     time.sleep(0.1)  # Wait a moment to ensure movement completes
