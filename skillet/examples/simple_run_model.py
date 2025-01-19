@@ -123,7 +123,8 @@ def get_joint_positions_and_velocities(
     Angles and velocities are in degrees/degrees-per-second from KOS by default.
     """
     actuator_ids = [ACTUATOR_NAME_TO_ID[j] for j in joint_names]
-    states = kos.actuator.get_actuators_state(actuator_ids)
+    response = kos.actuator.get_actuators_state(actuator_ids)
+    states = response.states
     positions_deg = {}
     velocities_dps = {}
     for s in states:
@@ -142,9 +143,9 @@ def get_imu_values(kos: pykos.KOS) -> np.ndarray:
     imu_data = kos.imu.get_imu_advanced_values()
     return np.array(
         [
-            imu_data.acc_x,
-            imu_data.acc_y,
-            imu_data.acc_z,
+            imu_data.lin_acc_x,
+            imu_data.lin_acc_y,
+            imu_data.lin_acc_z,
             imu_data.grav_x,
             imu_data.grav_y,
             imu_data.grav_z,
